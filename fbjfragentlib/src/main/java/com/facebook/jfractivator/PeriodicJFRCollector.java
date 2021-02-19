@@ -21,9 +21,12 @@ import jdk.jfr.Configuration;
 
 
 /**
- * This strategy runs JFR periodically, keeping at most 2 periods worth of JFR files
- * In case a GC event happens, then all the files are "sent" to destination
- * by signaling to an external agent by renaming them to ".jfr" 
+ * This strategy runs JFR periodically, forever,
+ * While keeping the current JFR dumps and the previous set
+ * both on the disk
+ * If nothing of interest (FullGC) happens, the previous set is deleted
+ * Otherwise both the current set and the previous set will be signaled
+ * for  the uploading agent to send them
  */
 public class PeriodicJFRCollector implements JFRStrategy {
 	
