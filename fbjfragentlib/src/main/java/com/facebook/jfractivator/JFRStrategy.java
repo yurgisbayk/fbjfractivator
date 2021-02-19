@@ -20,7 +20,7 @@ public interface JFRStrategy {
 	static JFRStrategy initialize(String args) {
 		// TODO: add on demand JFR triggering,
 		// for now we hard-code a simple strategy
-		return new PeriodicJFRCollector(args);
+		return new ContinuousJFRReportingStrategy(args);
 	}
 
 	public void onJFRFileReady( Path file );

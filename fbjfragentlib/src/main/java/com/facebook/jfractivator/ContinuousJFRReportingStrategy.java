@@ -21,14 +21,14 @@ import jdk.jfr.Configuration;
 
 
 /**
- * This strategy runs JFR periodically, forever,
- * While keeping the current JFR dumps and the previous set
+ * This strategy runs JFR permanently in a loop, 
+ * while keeping the current JFR file and the previous set
  * both on the disk
- * If nothing of interest (FullGC) happens, the previous set is deleted
+ * If nothing of interest (FullGC) happens, the previous set is discarded
  * Otherwise both the current set and the previous set will be signaled
  * for  the uploading agent to send them
  */
-public class PeriodicJFRCollector implements JFRStrategy {
+public class ContinuousJFRReportingStrategy implements JFRStrategy {
 	
 	public static class JFRRecordingOptions implements JFRStrategy.IJfrRecordingOptions {
 		
@@ -145,7 +145,7 @@ public class PeriodicJFRCollector implements JFRStrategy {
 	private ArrayList<Path> previousFiles = new ArrayList<>();
 	private ArrayList<Path> currentFiles = new ArrayList<>();
 
-	public PeriodicJFRCollector(String args) {
+	public ContinuousJFRReportingStrategy(String args) {
 		mxBean = findMXBeanForOldGenGC();
 		lastGcCount = mxBean != null ? mxBean.getCollectionCount() : -1;
 	}
