@@ -1,8 +1,14 @@
-package com.facebook.jfractivator.demo;
+package com.facebook.jfractivator;
 
-public class MemoryPressurizingApp {
+/**
+ * Not a test !
+ * But it is convenient to debug under IDE by invoking JFRAgent from main()
+ */
+public class DemoActivateAgent {
+
 	public static void main(String[] args) {
 		try {
+			JFRAgent.premain("", null);
 			var t=new Thread(() -> {
 				System.out.println("Hello from memory pressurizer.");
 				try {
@@ -18,7 +24,6 @@ public class MemoryPressurizingApp {
 		} catch(Exception ex) {
 			ex.printStackTrace(System.err);
 		}
-		
 	}
 
 }
