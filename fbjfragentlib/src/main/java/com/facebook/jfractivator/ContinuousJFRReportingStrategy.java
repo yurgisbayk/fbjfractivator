@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -37,15 +38,24 @@ public class ContinuousJFRReportingStrategy implements JFRStrategy {
 
 	
 		static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy_MM_dd_HHmm");
+        static final Path jfrDumpDir = Paths.get(System.getProperty("jfrDumpDir", "/tmp/jfrdumps/"));
+        static {
+        	try {
+	        	if (! Files.isDirectory(jfrDumpDir)) {
+	        		Files.createDirectories(jfrDumpDir);
+	        	}
+        	} catch(Exception ex) {
+        		throw new RuntimeException("Invalid or otherwise inaccessible jfrDumpDir: "+jfrDumpDir);
+        	}
+        }
 		
 		JFRRecordingOptions() {
-	        String jfrDumpDir = System.getProperty("jfr_dump_dir", "/tmp");
 	        
 	        LocalDateTime timeStarting = LocalDateTime.now(ZoneId.of("UTC"));
 	        String timeStartingStr = dateFormat.format(timeStarting);
-	        durations.put(Duration.ofMinutes(5),  Paths.get(jfrDumpDir, "jfrdump_05min_" + timeStartingStr + TEMP_EXTENSION));
-	        durations.put(Duration.ofMinutes(15), Paths.get(jfrDumpDir, "jfrdump_15min_" + timeStartingStr + TEMP_EXTENSION));
-	        durations.put(Duration.ofMinutes(30), Paths.get(jfrDumpDir, "jfrdump_30min_"+ timeStartingStr + TEMP_EXTENSION));
+	        durations.put(Duration.ofMinutes(5),  jfrDumpDir.resolve("jfrdump_05min_" + timeStartingStr + TEMP_EXTENSION));
+	        durations.put(Duration.ofMinutes(15), jfrDumpDir.resolve("jfrdump_15min_" + timeStartingStr + TEMP_EXTENSION));
+	        durations.put(Duration.ofMinutes(30), jfrDumpDir.resolve("jfrdump_30min_"+ timeStartingStr + TEMP_EXTENSION));
 		}
 		
 		@Override

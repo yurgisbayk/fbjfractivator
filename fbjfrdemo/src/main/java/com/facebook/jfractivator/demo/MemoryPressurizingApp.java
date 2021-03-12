@@ -4,6 +4,8 @@ import java.math.BigInteger;
 import java.util.Random;
 import java.util.concurrent.Executors;
 
+import com.facebook.dontusememorywreck.MemoryPolluter;
+
 public class MemoryPressurizingApp {
 	public static void main(String[] args) {
 		try {
@@ -32,7 +34,11 @@ public class MemoryPressurizingApp {
 			}));
 			t.get();
 			System.out.println("The run has finished uneventfully, now exiting the application.");
-		} catch (Exception ex) {
+		}
+		catch (OutOfMemoryError ex) {
+			ex.printStackTrace(System.err);
+		}
+		catch (Exception ex) {
 			ex.printStackTrace(System.err);
 		}
 

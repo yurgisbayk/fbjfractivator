@@ -22,14 +22,15 @@ public class MemoryPolluter {
     private static final ThreadLocal<LinkedList<byte[]>> gcFuzzer = new ThreadLocal<>();
     private static final Random rnd = new Random();
 
-    private static final int garbageCycleLength = new Integer(System.getProperty("garbageCycleLength", "1000"));
+    private static final int garbageCycleLength =  Integer.parseInt(System.getProperty("garbageCycleLength", "1000"));
+    private static final int garbageBaseChunkKB = Integer.parseInt(System.getProperty("garbageBaseChunkKB", "384"));
     static {
         if (shouldAddGcPressure) {
             log.warn("gcPressure will work with garbageCycleLength: " + garbageCycleLength);
         }
     }
 
-    static void maybeAddGcPressure()
+    public static void maybeAddGcPressure()
     {
         // 1 in 1000 we make the garbage collectible
         if (rnd.nextInt(garbageCycleLength) == 0) {
@@ -47,7 +48,7 @@ public class MemoryPolluter {
                 list = new LinkedList<>();
                 gcFuzzer.set(list);
             }
-            list.add(new byte[(new Random().nextInt(10) + 1) * 384 * 1024]);
+            list.add(new byte[(new Random().nextInt(10) + 1) * garbageBaseChunkKB * 1024]);
         }
     }
 
