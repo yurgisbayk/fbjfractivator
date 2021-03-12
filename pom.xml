@@ -77,5 +77,6 @@
   <modules>
   	<module>fbjfragentlib</module>
   	<module>fbjfrdemo</module>
+  	<module>fbmemorywreckagent</module>
   </modules>
 </project>

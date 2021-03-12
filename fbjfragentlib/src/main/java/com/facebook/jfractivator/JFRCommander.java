@@ -33,7 +33,6 @@ public class JFRCommander implements Runnable  {
 		while((nextOptions = strategy.nextJFRRecordingOptions())!= null) {
 			performJFRRecording(nextOptions);
 		}
-		System.err.println();
 	}
 
     /**
