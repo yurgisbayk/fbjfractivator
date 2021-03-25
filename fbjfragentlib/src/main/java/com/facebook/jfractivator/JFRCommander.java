@@ -32,7 +32,13 @@ public class JFRCommander implements Runnable  {
 	public void run() {
 		IJfrRecordingOptions nextOptions;
 		while((nextOptions = strategy.nextJFRRecordingOptions())!= null) {
-			performJFRRecording(nextOptions);
+			long waitSeconds = nextOptions.shouldWaitAndAskAgainSeconds();
+			if (waitSeconds > 0) {
+				sleepQuietly(Duration.ofSeconds(waitSeconds));
+			}
+			else {
+				performJFRRecording(nextOptions);
+			}
 		}
 	}
 
@@ -111,5 +117,7 @@ public class JFRCommander implements Runnable  {
             throw new RuntimeException(ex);
         }
     }
+	
+	
 
 }
