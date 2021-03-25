@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Map.Entry;
 import java.util.SortedMap;
+import java.util.stream.Stream;
 
 import com.facebook.jfractivator.JFRStrategy.IJfrRecordingOptions;
 
@@ -35,10 +36,6 @@ public class JFRCommander implements Runnable  {
 		}
 	}
 
-    /**
-     * Starts one JFR recording and monitors the output file. 
-     * Once 
-     */
 	public void performJFRRecording(IJfrRecordingOptions recordingOptions)
     {
             SortedMap<Duration, Path> dumpIntervals = recordingOptions.dumpIntervals();
@@ -58,7 +55,7 @@ public class JFRCommander implements Runnable  {
             		strategy.onJFRFileReady(entry.getValue());
             		lastSleep = current;
             	}
-            	
+            	strategy.onJFRRecordingCompleted();
             }
             catch (Exception ex) {
                 System.err.println("Exception caught in JFR thread: " + ex);
@@ -84,22 +81,22 @@ public class JFRCommander implements Runnable  {
     
 
 	private boolean isJfrStillWorkingOn(Path path) throws IOException {
-		long fileSize = Files.size(path);
-		if (fileSize > 0) {
-			if (runningOnLinux) {
-				for (Path p : Files.list(Paths.get("/proc/self/fd")).toArray((n) -> new Path[n])) {
-					if (Files.isSymbolicLink(p) && Files.isSameFile(path, Files.readSymbolicLink(p))) {
-						return true;
+		if (runningOnLinux) {
+			try(Stream<Path> paths = Files.list(Paths.get("/proc/self/fd"))) {
+				return paths.anyMatch(p -> {
+					try {
+						return Files.isSymbolicLink(p) && Files.isSameFile(path, Files.readSymbolicLink(p));
+					} catch (IOException e) {
+						throw new RuntimeException(e);
 					}
-				}
-				return false;
-			}
-			else { // for other systems wait see if it does grow
-				sleepQuietly(Duration.ofSeconds(10));
-				return Files.size(path) > fileSize;
+				});
 			}
 		}
-		return true;
+		else { // for other systems wait until it stops growing
+			long fileSize = Files.size(path);
+			sleepQuietly(Duration.ofSeconds(10));
+			return Files.size(path) > fileSize;
+		}
 	}
 
 	private static void sleepQuietly(Duration d)

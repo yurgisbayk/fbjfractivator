@@ -23,11 +23,11 @@ import jdk.jfr.Configuration;
 
 /**
  * This strategy runs JFR permanently in a loop, 
- * while keeping the current JFR file and the previous set
- * both on the disk
- * If nothing of interest (FullGC) happens, the previous set is discarded
+ * while keeping the current JFR dump files
+ * and the previous set both on the disk
+ * If nothing of interest (FullGC) happens, the previous set is deleted (to avoid filling the disk)
  * Otherwise both the current set and the previous set will be signaled
- * for  the uploading agent to send them
+ * for the uploading agent to send them off the host.
  */
 public class ContinuousJFRReportingStrategy implements JFRStrategy {
 	

@@ -6,10 +6,11 @@ import java.util.concurrent.Executors;
 
 import com.facebook.dontusememorywreck.MemoryPolluter;
 
-public class MemoryPressurizingApp {
+public class MemoryProblemDemo {
 	public static void main(String[] args) {
 		try {
 			final Random rand = new Random();
+			boolean selfPolute = Boolean.valueOf(System.getProperty("memoryProblemDemo.selfPolute","true"));
 			var t = Executors.newSingleThreadExecutor().submit( Executors.callable(() ->{
 				System.out.println("Hello from memory pressurizer.");
 				try {
@@ -23,9 +24,11 @@ public class MemoryPressurizingApp {
 							
 							System.out.println("Generated: " +counter + "primes,  last one is: " + nextPrime);
 							lastTime = currTime;
-							Thread.sleep(5000); // maybe this lets the cpu core to less than 100%
+							Thread.sleep(5000); // to keep poluter 100%
 						}
-						MemoryPolluter.maybeAddGcPressure();
+						if (selfPolute) {
+							MemoryPolluter.maybeAddGcPressure();
+						}
 					}
 				} catch (Exception ex) {
 					ex.printStackTrace(System.err);
