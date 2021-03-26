@@ -7,8 +7,15 @@ import java.util.SortedMap;
 
 import jdk.jfr.Configuration;
 
-
-public interface JFRStrategy {
+/**
+ * Interface for the component responsible for orchestrating (deciding) :
+ * 1) when we JFR is invoked,
+ * 2) Once invoked, how often we command to dump what it has
+ * 3) What we do with the files JFR generates
+ * 
+ * @see JFRActuator
+ */
+public interface JFRDecider {
 
 	/**
 	 * @return the options to be used for next JFR Recording, or
@@ -23,19 +30,23 @@ public interface JFRStrategy {
 	 * of key=value. Values are assumed not to contain commas
 	 * and if needed use an escaping mechanism
 	 */
-	static JFRStrategy initialize(String args) {
+	static JFRDecider initialize(String args) {
 		String [] parts=args.split(",");
 		Properties props= new Properties();
 		for (String p:parts) {
+			if (p.isBlank()) {
+				continue;
+			}
 			int idx= p.indexOf('=');
 			if (idx<=0) {
-				throw new IllegalArgumentException("Configuration string should be key1=val1,ke2=val2,... , got invalid part: "+p);
+				throw new IllegalArgumentException(
+						"Configuration string should be key1=val1,ke2=val2,... , got invalid part: "+p);
 			}
 			props.setProperty(p.substring(0, idx), p.substring(idx+1));
 		}
 		// default is continuous
 		if (props.getProperty("strategy","continuous").equalsIgnoreCase("continuous")) {
-			return new ContinuousReportingStrategy(props);
+			return new ContinuousJFRStrategy(props);
 		}
 		return new ThresholdJFRStrategy(props);
 	}

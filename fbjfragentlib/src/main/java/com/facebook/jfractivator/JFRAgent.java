@@ -13,8 +13,8 @@ public class JFRAgent {
 	 */
     public static void premain(String args, Instrumentation inst) {
         System.out.println("JFRAgent loading the JFR activation mechanism, config: " + args);
-        JFRStrategy strategy = JFRStrategy.initialize(args);
-        JFRCommander.activate(strategy);
+        JFRDecider strategy = JFRDecider.initialize(args);
+        JFRActuator.activate(strategy);
         System.err.println("JFRAgent started successfully");
     }    	
 }

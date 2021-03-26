@@ -19,21 +19,21 @@ import java.util.Properties;
  * Otherwise both the current set and the previous set will be signaled
  * for the uploading agent to send them off the host.
  */
-public class ContinuousReportingStrategy implements JFRStrategy {
+public class ContinuousJFRStrategy implements JFRDecider {
 	
 	@Override
 	public IJfrRecordingOptions nextJFRRecordingOptions() {
 		if (mxBean == null) {
 			return null;
 		}
-		return new DefaultJFRRecordingOptions();
+		return new DefaultRecordingOptions(props);
 	}
 
 	@Override
 	public void onJFRFileReady(Path file ) {
 		long currentGcCount = mxBean.getCollectionCount();
 		if (currentGcCount != lastGcCount) {
-			DefaultJFRRecordingOptions.signalOneFile(file);
+			DefaultRecordingOptions.signalOneFile(file);
 		} else {
 			currentFiles.add(file);
 		}
@@ -44,15 +44,23 @@ public class ContinuousReportingStrategy implements JFRStrategy {
 		long currentGcCount = mxBean.getCollectionCount();
 		// if we've had a GC since previous recording,
 		// we'll upload both current and previous files
+		// and reset our state
 		if (currentGcCount != lastGcCount) {
-			DefaultJFRRecordingOptions.signalFilesToAgent(previousFiles);
-			DefaultJFRRecordingOptions.signalFilesToAgent(currentFiles);
+			DefaultRecordingOptions.signalFilesToAgent(previousFiles);
+			DefaultRecordingOptions.signalFilesToAgent(currentFiles);
+			currentFiles.clear();
+			previousFiles.clear();
+			lastGcCount = currentGcCount;
 		}
-		deletePreviousFiles();
-		var tmp = previousFiles;
-		previousFiles = currentFiles;
-		tmp.clear();
-		currentFiles=tmp;
+		else {
+			// nothing happened, discard previous files
+			// switch previous <- current , current := []
+			deletePreviousFiles();
+			var tmp = previousFiles;
+			previousFiles = currentFiles;
+			tmp.clear();
+			currentFiles=tmp;
+		}
 	}
 	
 	private void deletePreviousFiles() {
@@ -68,13 +76,15 @@ public class ContinuousReportingStrategy implements JFRStrategy {
 
 	private final GarbageCollectorMXBean mxBean;
 	private long lastGcCount;
+	private final Properties props;
 
 	private ArrayList<Path> previousFiles = new ArrayList<>();
 	private ArrayList<Path> currentFiles = new ArrayList<>();
 
-	public ContinuousReportingStrategy(Properties props) {
+	public ContinuousJFRStrategy(Properties props) {
 		mxBean = findMXBeanForOldGenGC();
 		lastGcCount = mxBean != null ? mxBean.getCollectionCount() : -1;
+		this.props = (Properties)props.clone();
 	}
 	
 	private static GarbageCollectorMXBean findMXBeanForOldGenGC() {

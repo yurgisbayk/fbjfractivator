@@ -10,7 +10,7 @@ public class MemoryProblemDemo {
 	public static void main(String[] args) {
 		try {
 			final Random rand = new Random();
-			boolean selfPolute = Boolean.valueOf(System.getProperty("memoryProblemDemo.selfPolute","true"));
+			boolean selfPolute = Boolean.valueOf(System.getProperty("memoryProblemDemo.selfPolute","false"));
 			var t = Executors.newSingleThreadExecutor().submit( Executors.callable(() ->{
 				System.out.println("Hello from memory pressurizer.");
 				try {
@@ -20,11 +20,11 @@ public class MemoryProblemDemo {
 						BigInteger nextPrime = BigInteger.probablePrime(160, rand);
 						counter++;
 						long currTime= System.currentTimeMillis();
-						if (currTime - lastTime >10000) {
+						if (currTime - lastTime >1000) {
 							
 							System.out.println("Generated: " +counter + "primes,  last one is: " + nextPrime);
 							lastTime = currTime;
-							Thread.sleep(5000); // to keep poluter 100%
+							Thread.sleep(5000); // to keep CPU core usage less than 100%
 						}
 						if (selfPolute) {
 							MemoryPolluter.maybeAddGcPressure();

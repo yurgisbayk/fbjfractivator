@@ -10,20 +10,20 @@ import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.stream.Stream;
 
-import com.facebook.jfractivator.JFRStrategy.IJfrRecordingOptions;
+import com.facebook.jfractivator.JFRDecider.IJfrRecordingOptions;
 
 import jdk.jfr.Recording;
 
-public class JFRCommander implements Runnable  {
+public class JFRActuator implements Runnable  {
 	
-	private final JFRStrategy strategy;
-	public JFRCommander( JFRStrategy strategy) {
+	private final JFRDecider strategy;
+	public JFRActuator( JFRDecider strategy) {
 		this.strategy = strategy;
 	}
 
-	public static void activate(JFRStrategy strategy)
+	public static void activate(JFRDecider strategy)
     {
-		var t = new Thread( new JFRCommander(strategy), "JFR Commander");
+		var t = new Thread( new JFRActuator(strategy), "JFR Commander");
 		t.setDaemon(true);
 		t.start();
     }
@@ -48,7 +48,7 @@ public class JFRCommander implements Runnable  {
             try (Recording r = new Recording(recordingOptions.jfrConfiguration())) {
             	r.setMaxSize(recordingOptions.maxFileSize());
             	// we'll give it a little extra to account for delays generating the intermediary dumps
-                r.setMaxAge(dumpIntervals.lastKey().plus(Duration.ofMinutes(5)));
+                r.setMaxAge(dumpIntervals.lastKey().plus(Duration.ofMinutes(2)));
                 r.start();
                 Duration lastSleep = Duration.ofMinutes(0);
             	for(Entry<Duration, Path> entry: dumpIntervals.entrySet()) {
@@ -61,6 +61,7 @@ public class JFRCommander implements Runnable  {
             		strategy.onJFRFileReady(entry.getValue());
             		lastSleep = current;
             	}
+            	r.stop();
             	strategy.onJFRRecordingCompleted();
             }
             catch (Exception ex) {

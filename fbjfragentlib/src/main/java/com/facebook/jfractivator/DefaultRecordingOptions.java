@@ -9,13 +9,15 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Properties;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import jdk.jfr.Configuration;
 
-public class DefaultJFRRecordingOptions implements JFRStrategy.IJfrRecordingOptions {
+public class DefaultRecordingOptions implements JFRDecider.IJfrRecordingOptions {
 	
 	private final SortedMap<Duration,Path> durations = new TreeMap<>();
 
@@ -37,15 +39,31 @@ public class DefaultJFRRecordingOptions implements JFRStrategy.IJfrRecordingOpti
     	}
     }
 	
-	DefaultJFRRecordingOptions() {
-        
+	DefaultRecordingOptions(Properties props) {
         LocalDateTime timeStarting = LocalDateTime.now(ZoneId.of("UTC"));
         String timeStartingStr = dateFormat.format(timeStarting);
-        durations.put(Duration.ofMinutes(5),  jfrDumpDir.resolve("jfrdump_05min_" + timeStartingStr + DefaultJFRRecordingOptions.TEMP_EXTENSION));
-        durations.put(Duration.ofMinutes(15), jfrDumpDir.resolve("jfrdump_15min_" + timeStartingStr + DefaultJFRRecordingOptions.TEMP_EXTENSION));
-        durations.put(Duration.ofMinutes(30), jfrDumpDir.resolve("jfrdump_30min_"+ timeStartingStr + DefaultJFRRecordingOptions.TEMP_EXTENSION));
+        int[] intervals = parseIntervals(props.getProperty("jfrDumpIntervals", "4;8;16"));
+        for (int i:intervals) {
+        	Duration d = Duration.ofMinutes(i);
+        	durations.put(d,  jfrDumpDir.resolve("jfrdump_" +d + timeStartingStr + DefaultRecordingOptions.TEMP_EXTENSION));
+        }
 	}
 	
+	/**
+	 * semicolon separated list of integers 
+	 */
+	private int[] parseIntervals(String intervals) {
+		String [] splits= intervals.split(";");
+		int [] result = new int [ splits.length];
+		for (int i=0;i<splits.length; i++) {
+			result[i] = Integer.parseInt(splits[i]);
+			if (result[i] <= 0) {
+				throw new IllegalArgumentException("Invalid intervals, expecting list of positive integers, got: " + intervals);
+			}
+		}
+		return result;
+	}
+
 	@Override
 	public long shouldWaitAndAskAgainSeconds() {
 		return 0;
