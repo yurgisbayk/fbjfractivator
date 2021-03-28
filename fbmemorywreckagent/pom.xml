@@ -30,7 +30,7 @@
 				<configuration>
 					<archive>
 						<manifestEntries>
-							<Premain-Class>com.facebook.dontusememorywreck.MemoryPolluter</Premain-Class>
+							<Premain-Class>com.facebook.dontusememorywreck.MemoryPollutingAgent</Premain-Class>
 						</manifestEntries>
 					</archive>
 				</configuration>

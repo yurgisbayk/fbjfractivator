@@ -39,6 +39,12 @@ public class MemoryPolluter {
             if (lst != null) {
                 long memReleased = lst.stream().collect(Collectors.summingLong(x -> x.length));
                 log.warn("GCPRESSURIZER Releasing memory: " + (memReleased / 1024 / 1024) + " mb. ");
+                try {
+                	Thread.sleep(5000);
+                } 
+                catch(InterruptedException ex) {
+                	throw new RuntimeException(ex);
+                }
             }
         }
         else {

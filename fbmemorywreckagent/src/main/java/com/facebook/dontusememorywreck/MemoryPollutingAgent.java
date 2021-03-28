@@ -8,11 +8,11 @@ public class MemoryPollutingAgent {
 			try {
 				while(true) {
 					MemoryPolluter.maybeAddGcPressure();
-					Thread.sleep(5000);
 				}
 			}
-			catch(InterruptedException ex) {
-				System.err.println("Caught interruption, in memory poluting thread, will stop poluting !");
+			catch(Exception ex) {
+				System.err.println("Caught exception in memory poluting thread, will stop poluting ! "+ex);
+				ex.printStackTrace(System.err);
 			}
 		},"Memory Poluter").start();
 	}

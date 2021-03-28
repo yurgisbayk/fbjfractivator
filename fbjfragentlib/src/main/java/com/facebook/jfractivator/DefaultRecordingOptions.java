@@ -45,7 +45,7 @@ public class DefaultRecordingOptions implements JFRStrategy.IJfrRecordingOptions
         int[] intervals = parseIntervals(props.getProperty("jfrDumpIntervals", "4;8;16"));
         for (int i:intervals) {
         	Duration d = Duration.ofMinutes(i);
-        	durations.put(d,  jfrDumpDir.resolve("jfrdump_" +d + timeStartingStr + DefaultRecordingOptions.TEMP_EXTENSION));
+        	durations.put(d,  jfrDumpDir.resolve("jfrdump_" + timeStartingStr +'_' + d + DefaultRecordingOptions.TEMP_EXTENSION));
         }
 	}
 	
