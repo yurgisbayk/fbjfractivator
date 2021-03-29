@@ -31,6 +31,8 @@
 					<archive>
 						<manifestEntries>
 							<Premain-Class>com.facebook.dontusememorywreck.MemoryPollutingAgent</Premain-Class>
+				            <Agent-Class>com.facebook.dontusememorywreck.MemoryPollutingAgent</Agent-Class>
+            				<Permissions>all-permissions</Permissions>
 						</manifestEntries>
 					</archive>
 				</configuration>

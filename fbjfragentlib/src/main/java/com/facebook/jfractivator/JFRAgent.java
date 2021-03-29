@@ -17,4 +17,13 @@ public class JFRAgent {
         JFRCommander.activate(strategy);
         System.err.println("JFRAgent started successfully");
     }    	
+    
+    /**
+     * This method is invoked when the agent is loaded dynamically into the JVM
+     * @see com.sun.tools.attach.VirtualMachine load(...) API 
+     */
+    public static void agentmain(String args, Instrumentation inst) {
+    	premain(args, inst);
+    }
+    
 }

@@ -16,4 +16,8 @@ public class MemoryPollutingAgent {
 			}
 		},"Memory Poluter").start();
 	}
+	
+	public static void agentmain(String args, Instrumentation inst) {
+		premain(args, inst);
+	}
 }
