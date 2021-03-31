@@ -92,9 +92,17 @@ public class JFRCommander implements Runnable  {
 			try(Stream<Path> paths = Files.list(Paths.get("/proc/self/fd"))) {
 				return paths.anyMatch(p -> {
 					try {
-						return Files.isSymbolicLink(p) && Files.isSameFile(path, Files.readSymbolicLink(p));
-					} catch (IOException e) {
-						throw new RuntimeException(e);
+						if (Files.isSymbolicLink(p)) {
+							Path symlinked = Files.readSymbolicLink(p);
+							return Files.exists(symlinked) && Files.isSameFile(path,symlinked);
+						}
+						else {
+							return false;
+						}
+					} catch (Exception ex) {
+						System.err.println("Unexpected exception in processing /proc/self/fd directory "+ex);
+						ex.printStackTrace(System.err);
+						return false;
 					}
 				});
 			}
